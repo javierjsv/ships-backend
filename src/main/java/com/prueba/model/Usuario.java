@@ -1,7 +1,10 @@
 package com.prueba.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
+import javax.persistence.CascadeType;
 
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -11,6 +14,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.validation.constraints.Email;
@@ -20,30 +24,30 @@ import javax.validation.constraints.Size;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
-@Table(name = "users", uniqueConstraints = {
+@Table(name = "usuario", uniqueConstraints = {
         @UniqueConstraint(columnNames = {
-            "username"
+            "cedula"
         }),
         @UniqueConstraint(columnNames = {
             "email"
         })
 })
-public class User{
+public class Usuario implements Serializable{
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    @Size(min=3, max = 50)
-    private String name;
+    @Size(min=3, max = 80)
+    private String nombre;
 
     @NotBlank
-    @Size(min=3, max = 50)
-    private String username;
+    @Size(min=3, max = 12)
+    private String cedula;
 
     @NaturalId
     @NotBlank
-    @Size(max = 50)
+    @Size(max = 80)
     @Email
     private String email;
 
@@ -55,17 +59,21 @@ public class User{
     @JoinTable(name = "user_roles", 
     	joinColumns = @JoinColumn(name = "user_id"), 
     	inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
+    private Set<Rol> roles = new HashSet<>();
+    
 
-    public User() {}
+    public Usuario() {}
 
-    public User(String name, String username, String email, String password) {
-        this.name = name;
-        this.username = username;
+    public Usuario(String nombre, String cedula, String email, String password) {
+        
+        this.nombre = nombre;
+        this.cedula = cedula;
         this.email = email;
         this.password = password;
     }
 
+
+    
     public Long getId() {
         return id;
     }
@@ -74,22 +82,24 @@ public class User{
         this.id = id;
     }
 
-    public String getUsername() {
-        return username;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
-    public String getName() {
-        return name;
+    public String getCedula() {
+        return cedula;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setCedula(String cedula) {
+        this.cedula = cedula;
     }
 
+    
+    
     public String getEmail() {
         return email;
     }
@@ -106,11 +116,13 @@ public class User{
         this.password = password;
     }
 
-    public Set<Role> getRoles() {
+    public Set<Rol> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<Role> roles) {
+    public void setRoles(Set<Rol> roles) {
         this.roles = roles;
     }
+
+    
 }

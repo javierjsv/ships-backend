@@ -1,6 +1,6 @@
 package com.prueba.security.services;
 
-import com.prueba.model.User;
+import com.prueba.model.Usuario;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,9 +16,9 @@ public class UserPrinciple implements UserDetails {
 
 	private Long id;
 
-    private String name;
+    private String nombre;
 
-    private String username;
+    private String cedula;
 
     private String email;
 
@@ -27,26 +27,26 @@ public class UserPrinciple implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserPrinciple(Long id, String name, 
-			    		String username, String email, String password, 
+    public UserPrinciple(Long id, String nombre, 
+			    		String cedula, String email, String password, 
 			    		Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
-        this.name = name;
-        this.username = username;
+        this.nombre = nombre;
+        this.cedula = cedula;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
     }
 
-    public static UserPrinciple build(User user) {
+    public static UserPrinciple build(Usuario user) {
         List<GrantedAuthority> authorities = user.getRoles().stream().map(role ->
-                new SimpleGrantedAuthority(role.getName().name())
+                new SimpleGrantedAuthority(role.getNombre())
         ).collect(Collectors.toList());
 
         return new UserPrinciple(
                 user.getId(),
-                user.getName(),
-                user.getUsername(),
+                user.getNombre(),
+                user.getCedula(),
                 user.getEmail(),
                 user.getPassword(),
                 authorities
@@ -57,17 +57,16 @@ public class UserPrinciple implements UserDetails {
         return id;
     }
 
-    public String getName() {
-        return name;
+    public String getNombre() {
+        return nombre;
     }
 
     public String getEmail() {
         return email;
     }
 
-    @Override
-    public String getUsername() {
-        return username;
+    public String getCedula() {
+        return cedula;
     }
 
     @Override
@@ -107,5 +106,10 @@ public class UserPrinciple implements UserDetails {
         
         UserPrinciple user = (UserPrinciple) o;
         return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public String getUsername() {
+    return email;
     }
 }

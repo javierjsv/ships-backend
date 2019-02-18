@@ -8,11 +8,8 @@ import javax.validation.Valid;
 import com.prueba.message.request.LoginForm;
 import com.prueba.message.request.SignUpForm;
 import com.prueba.message.response.JwtResponse;
-import com.prueba.model.Role;
-import com.prueba.model.RoleName;
-import com.prueba.model.User;
-import com.prueba.repository.RoleRepository;
-import com.prueba.repository.UserRepository;
+import com.prueba.model.Rol;
+import com.prueba.model.Usuario;
 import com.prueba.security.jwt.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,20 +24,22 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.prueba.repository.RolRepository;
+import com.prueba.repository.UsuarioRepository;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
-public class AuthRestAPIs {
+public class AuthResource {
 
     @Autowired
     AuthenticationManager authenticationManager;
 
     @Autowired
-    UserRepository userRepository;
+    UsuarioRepository usuarioRepository;
 
     @Autowired
-    RoleRepository roleRepository;
+    RolRepository rolRepository;
 
     @Autowired
     PasswordEncoder encoder;
@@ -48,12 +47,12 @@ public class AuthRestAPIs {
     @Autowired
     JwtProvider jwtProvider;
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginForm loginRequest) {
 
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsername(),
+                        loginRequest.getEmail(),
                         loginRequest.getPassword()
                 )
         );
@@ -64,49 +63,41 @@ public class AuthRestAPIs {
         return ResponseEntity.ok(new JwtResponse(jwt));
     }
 
-    @PostMapping("/signup")
+    @PostMapping("/registrar")
     public ResponseEntity<String> registerUser(@Valid @RequestBody SignUpForm signUpRequest) {
-        if(userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return new ResponseEntity<String>("Fail -> Username is already taken!",
-                    HttpStatus.BAD_REQUEST);
-        }
-
-        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return new ResponseEntity<String>("Fail -> Email is already in use!",
+        if(usuarioRepository.existsByEmail(signUpRequest.getEmail())) {
+            return new ResponseEntity<String>("Fail -> Ya se encuentra registrado el email!",
                     HttpStatus.BAD_REQUEST);
         }
 
         // Creating user's account
-        User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
+        Usuario user = new Usuario(signUpRequest.getNombre(), signUpRequest.getCedula(),
                 signUpRequest.getEmail(), encoder.encode(signUpRequest.getPassword()));
 
-        Set<String> strRoles = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
+        Set<String> strRoles = signUpRequest.getRol();
+        Set<Rol> roles = new HashSet<>();
 
         strRoles.forEach(role -> {
         	switch(role) {
-	    		case "admin":
-	    			Role adminRole = roleRepository.findByName(RoleName.ROLE_ADMIN)
-	                .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-	    			roles.add(adminRole);
+	    		case "Administrador":
+	    			Rol adminRol = rolRepository.findByNombre(role)
+	                .orElseThrow(() -> new RuntimeException("Fail! -> Causa: rol no encontrado"));
+	    			roles.add(adminRol);
 	    			
 	    			break;
-	    		case "pm":
-	            	Role pmRole = roleRepository.findByName(RoleName.ROLE_PM)
-	                .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-	            	roles.add(pmRole);
+	    		case "Lider":
+	            	Rol liderRol = rolRepository.findByNombre(role)
+	                .orElseThrow(() -> new RuntimeException("Fail! -> Causa: rol no encontrado"));
+	            	roles.add(liderRol);
 	            	
 	    			break;
-	    		default:
-	        		Role userRole = roleRepository.findByName(RoleName.ROLE_USER)
-	                .orElseThrow(() -> new RuntimeException("Fail! -> Cause: User Role not find."));
-	        		roles.add(userRole);        			
+	    		    			
         	}
         });
         
         user.setRoles(roles);
-        userRepository.save(user);
+        usuarioRepository.save(user);
 
-        return ResponseEntity.ok().body("User registered successfully!");
+        return ResponseEntity.ok().body("Usuario registrado correctamente!");
     }
 }

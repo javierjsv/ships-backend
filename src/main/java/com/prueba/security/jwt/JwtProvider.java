@@ -2,6 +2,7 @@ package com.prueba.security.jwt;
 
 import com.prueba.security.services.UserPrinciple;
 import io.jsonwebtoken.*;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtProvider {
@@ -22,11 +25,14 @@ public class JwtProvider {
     private int jwtExpiration;
 
     public String generateJwtToken(Authentication authentication) {
+        
+        System.out.println("entra");
 
         UserPrinciple userPrincipal = (UserPrinciple) authentication.getPrincipal();
-
-        return Jwts.builder()
-		                .setSubject((userPrincipal.getUsername()))
+        Map<String, Object> info = new HashMap<>();
+           info.put("roles", Arrays.toString(userPrincipal.getAuthorities().toArray()));
+        return Jwts.builder().setClaims(info)
+		                .setSubject((userPrincipal.getEmail()))
 		                .setIssuedAt(new Date())
 		                .setExpiration(new Date((new Date()).getTime() + jwtExpiration*1000))
 		                .signWith(SignatureAlgorithm.HS512, jwtSecret)
