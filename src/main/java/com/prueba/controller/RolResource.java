@@ -22,26 +22,22 @@ public class RolResource {
     RolRepository rolRepository;
 
     @GetMapping("/roles")
-    @PreAuthorize("hasAuthority('Admin')")
     public List<Rol> getAll() {
         return rolRepository.findAll();
     }
 
     @PostMapping("/roles")
-    @PreAuthorize("hasAuthority('Admin')")
     public Rol create(@Valid @RequestBody Rol r) {
         return rolRepository.save(r);
     }
 
     @GetMapping("/roles/{id}")
-    @PreAuthorize("hasAuthority('Admin')")
     public Rol getById(@PathVariable(value = "id") Long id) {
         return rolRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rol", "id", id));
     }
 
     @PutMapping("/roles/{id}")
-    @PreAuthorize("hasAuthority('Admin')")
     public Rol update(@PathVariable(value = "id") Long id,
             @Valid @RequestBody Rol r) {
 
@@ -53,7 +49,6 @@ public class RolResource {
     }
 
     @DeleteMapping("/roles/{id}")
-    @PreAuthorize("hasAuthority('Admin')")
     public ResponseEntity<?> delete(@PathVariable(value = "id") Long id) {
         Rol rol = rolRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Rol", "id", id));

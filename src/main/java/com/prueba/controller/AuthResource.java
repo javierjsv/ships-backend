@@ -64,7 +64,7 @@ public class AuthResource {
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody SignUpForm signUpRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignUpForm signUpRequest) {
         if(usuarioRepository.existsByEmail(signUpRequest.getEmail())) {
             return new ResponseEntity<String>("Fail -> Ya se encuentra registrado el email!",
                     HttpStatus.BAD_REQUEST);
@@ -78,26 +78,14 @@ public class AuthResource {
         Set<Rol> roles = new HashSet<>();
 
         strRoles.forEach(role -> {
-        	switch(role) {
-	    		case "Administrador":
-	    			Rol adminRol = rolRepository.findByNombre(role)
-	                .orElseThrow(() -> new RuntimeException("Fail! -> Causa: rol no encontrado"));
-	    			roles.add(adminRol);
-	    			
-	    			break;
-	    		case "Lider":
-	            	Rol liderRol = rolRepository.findByNombre(role)
-	                .orElseThrow(() -> new RuntimeException("Fail! -> Causa: rol no encontrado"));
-	            	roles.add(liderRol);
-	            	
-	    			break;
-	    		    			
-        	}
+            Rol adminRol = rolRepository.findByNombre(role)
+                    .orElseThrow(() -> new RuntimeException("Fail! -> Causa: rol no encontrado"));
+            roles.add(adminRol);
         });
         
         user.setRoles(roles);
         usuarioRepository.save(user);
 
-        return ResponseEntity.ok().body("Usuario registrado correctamente!");
+        return ResponseEntity.ok().body(user);
     }
 }
